@@ -80,6 +80,7 @@ class _TaskManagementPageState extends State<TaskManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Management'),
+        centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(

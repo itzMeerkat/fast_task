@@ -83,6 +83,7 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Tracker'),
+        centerTitle: false,
         actions: [
           Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) {
@@ -162,17 +163,26 @@ class _HomepageState extends State<Homepage> {
               },
             ),
           ),
-          // Add Task Card - fixed at bottom
-          Card(
-            margin: EdgeInsets.all(10),
-            elevation: 8,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16))
-                // topLeft: Radius.circular(16),
-                // topRight: Radius.circular(16),
-              // ),
+          // Add Task Card - fixed at bottom with visual separation
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                  spreadRadius: 0,
+                ),
+              ],
             ),
-            child: Padding(
+            child: Card(
+              margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+              elevation: 12,
+              shadowColor: Colors.black.withOpacity(0.3),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+              ),
+              child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -261,6 +271,7 @@ class _HomepageState extends State<Homepage> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],

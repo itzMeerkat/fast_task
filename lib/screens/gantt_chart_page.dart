@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_tracker/models/task.dart';
+import 'package:fast_task/models/task.dart';
 import '../widgets/honest_gantt_chart/honest_gantt_chart.dart';
 import '../widgets/honest_gantt_chart/task_progress_data.dart';
 import '../providers/task_provider.dart';
@@ -31,7 +31,6 @@ class _GanttChartPageState extends State<GanttChartPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print("changing dep");
     // Reload data when dependencies change (e.g., when navigating back)
     _loadData();
   }
@@ -104,15 +103,16 @@ class _GanttChartPageState extends State<GanttChartPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Honest Gantt Chart'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        centerTitle: false,
+        // backgroundColor: Theme.of(context).colorScheme.primary,
+        // foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
           DropdownButton<GanttSortOption>(
             value: _currentSortOption,
-            dropdownColor: Theme.of(context).colorScheme.primary,
+            // dropdownColor: Theme.of(context).colorScheme.primary,
             icon: Icon(
               Icons.arrow_drop_down,
-              color: Theme.of(context).colorScheme.onPrimary,
+              // color: Theme.of(context).colorScheme.onPrimary,
             ),
             underline: Container(),
             items: GanttSortOption.values.map((GanttSortOption option) {
@@ -121,7 +121,7 @@ class _GanttChartPageState extends State<GanttChartPage> {
                 child: Text(
                   option.displayName,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    // color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               );
@@ -134,7 +134,7 @@ class _GanttChartPageState extends State<GanttChartPage> {
               }
             },
           ),
-          const SizedBox(width: 8),
+          // const SizedBox(width: 8),
         ],
       ),
       body: Consumer<TaskProvider>(

@@ -225,15 +225,28 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
       );
     }
 
-    return Container(
-      color: Colors.white,
-      child: Row(
-        children: [
-          // _buildDateHeader(widget.dayWidth),
-          _buildTaskLabelList(),
-          _buildTaskList(widget.dayWidth),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate total height needed for all tasks
+        final totalContentHeight = (1 + widget.taskProgressData.length) * widget.rowHeight;
+        
+        return Container(
+          color: Colors.white,
+          child: SingleChildScrollView(
+            child: SizedBox(
+              height: totalContentHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // _buildDateHeader(widget.dayWidth),
+                  _buildTaskLabelList(),
+                  _buildTaskList(widget.dayWidth),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

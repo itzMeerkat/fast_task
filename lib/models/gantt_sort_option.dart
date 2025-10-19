@@ -13,11 +13,11 @@ extension GanttSortOptionExtension on GanttSortOption {
   String get displayName {
     switch (this) {
       case GanttSortOption.nameAscending:
-        return 'Name (A-Z)';
+        return 'Sort by: Name (A-Z)';
       case GanttSortOption.nameDescending:
-        return 'Name (Z-A)';
+        return 'Sort by: Name (Z-A)';
       case GanttSortOption.recentProgress:
-        return 'Recent Progress';
+        return 'Sort by: Recent Progress';
     }
   }
 
