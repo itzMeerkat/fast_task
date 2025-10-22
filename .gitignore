@@ -2,9 +2,9 @@
 web
 ios
 macos
-android
+# android
 linux
-windows
+# windows
 
 .cursor
 .idea

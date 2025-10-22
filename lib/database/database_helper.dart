@@ -41,8 +41,8 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     if (Platform.isWindows || Platform.isLinux) {
       sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
     }
-    databaseFactory = databaseFactoryFfi;
     final io.Directory appDocumentsDir =
         await getApplicationDocumentsDirectory();
     // final databasesPath = await getDatabasesPath();
