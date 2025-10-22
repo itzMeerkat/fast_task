@@ -3,8 +3,10 @@ web
 ios
 macos
 # android
+android/app/release
 linux
 # windows
+build
 
 .cursor
 .idea
