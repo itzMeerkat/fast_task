@@ -1,10 +1,22 @@
 // Main Gantt chart widget that orchestrates the entire visualization
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'task_progress_data.dart';
 import '../../models/enums.dart';
+
+/// Custom scroll behavior that enables mouse drag scrolling on desktop
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.trackpad,
+  };
+}
 
 /// Custom Gantt chart widget that visualizes task progress with daily hour tracking
 class HonestGanttChart extends StatefulWidget {
@@ -39,8 +51,10 @@ class HonestGanttChart extends StatefulWidget {
 
 class _HonestGanttChartState extends State<HonestGanttChart> {
   final ItemScrollController _itemScrollController = ItemScrollController();
-  final ScrollOffsetController _scrollOffsetController = ScrollOffsetController();
-  final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
+  final ScrollOffsetController _scrollOffsetController =
+      ScrollOffsetController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
   late DateTime _startDate;
   late DateTime _endDate;
 
@@ -144,59 +158,92 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
     return Column(children: taskLabels);
   }
 
-  /// Build scrollable list of task rows
+  /// Build scrollable list of task rows with desktop mouse wheel support
   Widget _buildTaskList(double dayWidth) {
     return Expanded(
-      child: ScrollablePositionedList.builder(
-        scrollDirection: Axis.horizontal,
-        itemScrollController: _itemScrollController,
-        scrollOffsetController: _scrollOffsetController,
-        itemPositionsListener: _itemPositionsListener,
-        // Use a large but finite item count (e.g., 4000 = ~5.5 years of history each direction)
-        itemCount: 4000,
-        itemBuilder: (context, i) {
-          // Index 2000 is "today", so i-2000 gives days offset from today
-          var cDatetime = DateTime.now().add(Duration(days: i - 2000));
-          DateTime dateOnly = DateTime(
-            cDatetime.year,
-            cDatetime.month,
-            cDatetime.day,
-          );
+      child: Listener(
+        onPointerSignal: (pointerSignal) {
+          if (pointerSignal is PointerScrollEvent) {
+            // Convert vertical scroll to horizontal scroll
+            final scrollDelta = pointerSignal.scrollDelta.dy;
 
-          final List<Widget> cols = [
-            SizedBox(
-              height: widget.rowHeight,
-              child: Text(
-                DateFormat.MMMd().format(dateOnly),
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ];
-          for (var task in widget.taskProgressData) {
-            var height = getCellHeight(task, dateOnly);
-            cols.add(
-              SizedBox(
-                height: widget.rowHeight,
-                width: dayWidth,
-                child: height > 0
-                    ? Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          height:
-                              height *
-                              widget.rowHeight, // Convert fraction to pixels
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(5)),
-                            color: _getColorForPriority(task.task.priority),
-                          ),
-                        ),
-                      )
-                    : null,
-              ),
-            );
+            // Get current scroll offset
+            if (_itemPositionsListener.itemPositions.value.isNotEmpty) {
+              final positions = _itemPositionsListener.itemPositions.value;
+              final firstItem = positions.first;
+
+              // Calculate new scroll position (adjust sensitivity as needed)
+              final pixelsToScroll = scrollDelta;
+              final itemsToScroll = (pixelsToScroll / dayWidth).round();
+
+              if (itemsToScroll != 0) {
+                final newIndex = (firstItem.index + itemsToScroll).clamp(
+                  0,
+                  3999,
+                );
+                _itemScrollController.jumpTo(index: newIndex);
+              }
+            }
           }
-          return Column(children: cols);
         },
+        child: ScrollConfiguration(
+          behavior: CustomScrollBehavior(),
+          child: ScrollablePositionedList.builder(
+            scrollDirection: Axis.horizontal,
+            itemScrollController: _itemScrollController,
+            scrollOffsetController: _scrollOffsetController,
+            itemPositionsListener: _itemPositionsListener,
+            // Use a large but finite item count (e.g., 4000 = ~5.5 years of history each direction)
+            itemCount: 4000,
+            itemBuilder: (context, i) {
+              print("building item $i");
+              // Index 2000 is "today", so i-2000 gives days offset from today
+              var cDatetime = DateTime.now().add(Duration(days: i - 2000));
+              DateTime dateOnly = DateTime(
+                cDatetime.year,
+                cDatetime.month,
+                cDatetime.day,
+              );
+
+              final List<Widget> cols = [
+                SizedBox(
+                  height: widget.rowHeight,
+                  child: Text(
+                    DateFormat.MMMd().format(dateOnly),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ];
+              for (var task in widget.taskProgressData) {
+                var height = getCellHeight(task, dateOnly);
+                cols.add(
+                  SizedBox(
+                    height: widget.rowHeight,
+                    width: dayWidth,
+                    child: height > 0
+                        ? Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              height:
+                                  height *
+                                  widget
+                                      .rowHeight, // Convert fraction to pixels
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(5),
+                                ),
+                                color: _getColorForPriority(task.task.priority),
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                );
+              }
+              return Column(children: cols);
+            },
+          ),
+        ),
       ),
     );
   }
@@ -211,7 +258,11 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
     if (task.progressRecords.isEmpty) {
       return 0;
     }
-    if ((task.progressRecords.first.date.isBefore(date) && task.progressRecords.last.date.isAfter(date)) || (task.task.status == TaskStatus.inProgress && task.progressRecords.last.date.isBefore(date) && DateTime.now().isAfter(date))) {
+    if ((task.progressRecords.first.date.isBefore(date) &&
+            task.progressRecords.last.date.isAfter(date)) ||
+        (task.task.status == TaskStatus.inProgress &&
+            task.progressRecords.last.date.isBefore(date) &&
+            DateTime.now().isAfter(date))) {
       return 0.02;
     }
     return 0;
@@ -228,8 +279,9 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate total height needed for all tasks
-        final totalContentHeight = (1 + widget.taskProgressData.length) * widget.rowHeight;
-        
+        final totalContentHeight =
+            (1 + widget.taskProgressData.length) * widget.rowHeight;
+
         return Container(
           color: Colors.white,
           child: SingleChildScrollView(

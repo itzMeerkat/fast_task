@@ -1,8 +1,15 @@
 // Database helper singleton for managing SQLite database
 
+import 'dart:io' as io;
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'tables.dart';
+
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi/windows/sqflite_ffi_setup.dart';
 
 /// Singleton class for database operations
 class DatabaseHelper {
@@ -32,14 +39,22 @@ class DatabaseHelper {
 
   /// Initialize database
   Future<Database> _initDatabase() async {
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, databaseName);
-
-    return await openDatabase(
+    if (Platform.isWindows || Platform.isLinux) {
+      sqfliteFfiInit();
+    }
+    databaseFactory = databaseFactoryFfi;
+    final io.Directory appDocumentsDir =
+        await getApplicationDocumentsDirectory();
+    // final databasesPath = await getDatabasesPath();
+    final path = join(appDocumentsDir.path, "fast_task", databaseName);
+    print('Database path: $path');
+    return await databaseFactory.openDatabase(
       path,
-      version: databaseVersion,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      options: OpenDatabaseOptions(
+        version: databaseVersion,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      ),
     );
   }
 
@@ -56,28 +71,24 @@ class DatabaseHelper {
       // Migrate to version 2: Add unique constraint on (task_id, date)
       // Get existing progress records
       final records = await db.query(progressTableName);
-      
+
       // Drop old table
       await db.execute('DROP TABLE IF EXISTS $progressTableName');
-      
+
       // Create new table with unique constraint
       await db.execute(createProgressTableSql);
       await db.execute(createProgressIndexSql);
-      
+
       // Re-insert records with normalized dates (start of day)
       for (final record in records) {
         final date = DateTime.fromMillisecondsSinceEpoch(record['date'] as int);
         final startOfDay = DateTime(date.year, date.month, date.day);
-        
-        await db.insert(
-          progressTableName,
-          {
-            'task_id': record['task_id'],
-            'date': startOfDay.millisecondsSinceEpoch,
-            'hours_spent': record['hours_spent'],
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+
+        await db.insert(progressTableName, {
+          'task_id': record['task_id'],
+          'date': startOfDay.millisecondsSinceEpoch,
+          'hours_spent': record['hours_spent'],
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }
   }
@@ -89,4 +100,3 @@ class DatabaseHelper {
     _database = null;
   }
 }
-

@@ -50,6 +50,8 @@ dependencies:
   # Notifications
   flutter_local_notifications: any
   timezone: any
+  sqflite_common_ffi: ^2.3.6
+  sqlite3_flutter_libs: ^0.5.40
 
 dev_dependencies:
   flutter_test:
