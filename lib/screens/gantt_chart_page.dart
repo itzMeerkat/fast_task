@@ -180,7 +180,7 @@ class _GanttChartPageState extends State<GanttChartPage> {
                 _currentSortOption,
               );
 
-              return Padding(
+              return  Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: HonestGanttChart(
                   taskProgressData: sortedTaskProgressData,

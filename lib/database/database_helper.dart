@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 import 'tables.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi/windows/sqflite_ffi_setup.dart';
+// import 'package:sqflite_common_ffi/windows/sqflite_ffi_setup.dart';
 
 /// Singleton class for database operations
 class DatabaseHelper {

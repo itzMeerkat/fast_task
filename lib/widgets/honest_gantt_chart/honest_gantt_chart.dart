@@ -125,13 +125,23 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
   }
 
   Widget _buildTaskLabelList() {
-    final List<Widget> taskLabels = [SizedBox(height: widget.rowHeight)];
+    final List<Widget> taskLabels = [SizedBox(height: widget.rowHeight-15)];
     for (var task in widget.taskProgressData) {
       taskLabels.add(
         Container(
           height: widget.rowHeight,
           width: widget.labelWidth,
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
+          decoration: BoxDecoration(
+            border: task != widget.taskProgressData.last
+                          ? Border(
+                              bottom: BorderSide(
+                                color: Colors.grey,
+                                width:0.4,
+                              ),
+                            )
+                          : null,
+          ),
           child: Row(
             children: [
               Container(
@@ -146,7 +156,7 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
               Expanded(
                 child: Text(
                   task.task.brief,
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 18),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -155,7 +165,20 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
         ),
       );
     }
-    return Column(children: taskLabels);
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(8, 0),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(children: taskLabels),
+    );
   }
 
   /// Build scrollable list of task rows with desktop mouse wheel support
@@ -196,7 +219,7 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
             // Use a large but finite item count (e.g., 4000 = ~5.5 years of history each direction)
             itemCount: 4000,
             itemBuilder: (context, i) {
-              print("building item $i");
+              // print("building item $i");
               // Index 2000 is "today", so i-2000 gives days offset from today
               var cDatetime = DateTime.now().add(Duration(days: i - 2000));
               DateTime dateOnly = DateTime(
@@ -206,41 +229,82 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
               );
 
               final List<Widget> cols = [
-                SizedBox(
-                  height: widget.rowHeight,
-                  child: Text(
-                    DateFormat.MMMd().format(dateOnly),
-                    style: const TextStyle(fontSize: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.black, width: 1),
+                    ),
+                  ),
+                  child: SizedBox(
+                    height: widget.rowHeight-15,
+                    width: dayWidth,
+                    child: Column(
+                      children: [
+                        Spacer(),
+                        Text(
+                          textAlign: TextAlign.center,
+                          DateFormat.MMMd().format(dateOnly),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        Text(
+                          DateFormat.E().format(dateOnly),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
                   ),
                 ),
               ];
               for (var task in widget.taskProgressData) {
                 var height = getCellHeight(task, dateOnly);
                 cols.add(
-                  SizedBox(
-                    height: widget.rowHeight,
-                    width: dayWidth,
-                    child: height > 0
-                        ? Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              height:
-                                  height *
-                                  widget
-                                      .rowHeight, // Convert fraction to pixels
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(5),
-                                ),
-                                color: _getColorForPriority(task.task.priority),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: task != widget.taskProgressData.last
+                          ? Border(
+                              bottom: BorderSide(
+                                color: Colors.grey,
+                                width: 0.2,
                               ),
-                            ),
-                          )
-                        : null,
+                            )
+                          : null,
+                    ),
+                    child: SizedBox(
+                      height: widget.rowHeight,
+                      width: dayWidth,
+                      child: height > 0
+                          ? Align(
+                              alignment: Alignment.topCenter,
+                              child: Container(
+                                height:
+                                    height *
+                                    widget
+                                        .rowHeight, // Convert fraction to pixels
+                                decoration: BoxDecoration(
+                                  // borderRadius: const BorderRadius.all(
+                                  //   Radius.circular(3),
+                                  // ),
+                                  color: _getColorForPriority(
+                                    task.task.priority,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
                   ),
                 );
               }
-              return Column(children: cols);
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    right: BorderSide(color: Colors.grey, width: 0.5),
+                  ),
+                  color: dateOnly.weekday >5 ? Colors.grey.shade200:null
+                ),
+                child: Column(children: cols),
+              );
             },
           ),
         ),
@@ -276,29 +340,25 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate total height needed for all tasks
-        final totalContentHeight =
-            (1 + widget.taskProgressData.length) * widget.rowHeight;
+    // Calculate total height needed for all tasks
+    final totalContentHeight =
+        (1 + widget.taskProgressData.length) * (widget.rowHeight + 1);
 
-        return Container(
-          color: Colors.white,
-          child: SingleChildScrollView(
-            child: SizedBox(
-              height: totalContentHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // _buildDateHeader(widget.dayWidth),
-                  _buildTaskLabelList(),
-                  _buildTaskList(widget.dayWidth),
-                ],
-              ),
-            ),
+    return Container(
+      color: Colors.white,
+      child: SingleChildScrollView(
+        child: SizedBox(
+          height: totalContentHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // _buildDateHeader(widget.dayWidth),
+              _buildTaskLabelList(),
+              _buildTaskList(widget.dayWidth),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
