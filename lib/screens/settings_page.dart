@@ -20,10 +20,6 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: false,
-      ),
       body: ListView(
         children: [
           const SizedBox(height: 16),
@@ -32,9 +28,9 @@ class SettingsPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               'Support',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Card(
@@ -58,16 +54,14 @@ class SettingsPage extends StatelessWidget {
                           children: [
                             Text(
                               'Support Development',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Help us keep improving the app',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.grey.shade600),
                             ),
                           ],
                         ),
@@ -79,16 +73,15 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'If you find this app helpful, consider supporting us! Your contribution helps us continue developing new features and maintaining the app.',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      height: 1.5,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade700, height: 1.5),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: () => _handlePurchase(context),
                     icon: const Icon(Icons.payment),
-                    label: const Text('Not implemented yet, but thanks for clicking'),
+                    label: const Text(
+                      'Not implemented yet, but thanks for clicking',
+                    ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -120,9 +113,9 @@ class SettingsPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               'About',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Card(
@@ -163,4 +156,3 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
-

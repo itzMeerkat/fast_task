@@ -51,13 +51,12 @@ class _GanttChartPageState extends State<GanttChartPage> {
 
     for (final task in tasks) {
       // Fetch progress records for this task
-      final progressRecords = await _progressRepository.getProgressByTaskId(task.id!);
-      
+      final progressRecords = await _progressRepository.getProgressByTaskId(
+        task.id!,
+      );
+
       taskProgressDataList.add(
-        TaskProgressData(
-          task: task,
-          progressRecords: progressRecords,
-        ),
+        TaskProgressData(task: task, progressRecords: progressRecords),
       );
     }
     return taskProgressDataList;
@@ -69,32 +68,34 @@ class _GanttChartPageState extends State<GanttChartPage> {
     GanttSortOption sortOption,
   ) {
     final sortedData = List<TaskProgressData>.from(data);
-    
+
     switch (sortOption) {
       case GanttSortOption.nameAscending:
-        sortedData.sort((a, b) => 
-          a.task.brief.toLowerCase().compareTo(b.task.brief.toLowerCase())
+        sortedData.sort(
+          (a, b) =>
+              a.task.brief.toLowerCase().compareTo(b.task.brief.toLowerCase()),
         );
         break;
       case GanttSortOption.nameDescending:
-        sortedData.sort((a, b) => 
-          b.task.brief.toLowerCase().compareTo(a.task.brief.toLowerCase())
+        sortedData.sort(
+          (a, b) =>
+              b.task.brief.toLowerCase().compareTo(a.task.brief.toLowerCase()),
         );
         break;
       case GanttSortOption.recentProgress:
         sortedData.sort((a, b) {
           final aDate = a.lastProgressDate;
           final bDate = b.lastProgressDate;
-          
+
           if (aDate == null && bDate == null) return 0;
           if (aDate == null) return 1;
           if (bDate == null) return -1;
-          
+
           return bDate.compareTo(aDate);
         });
         break;
     }
-    
+
     return sortedData;
   }
 
@@ -102,8 +103,8 @@ class _GanttChartPageState extends State<GanttChartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Honest Gantt Chart'),
-        centerTitle: false,
+        // title: const Text('Honest Gantt Chart'),
+        // centerTitle: false,
         // backgroundColor: Theme.of(context).colorScheme.primary,
         // foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
@@ -180,7 +181,7 @@ class _GanttChartPageState extends State<GanttChartPage> {
                 _currentSortOption,
               );
 
-              return  Padding(
+              return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: HonestGanttChart(
                   taskProgressData: sortedTaskProgressData,
@@ -197,4 +198,3 @@ class _GanttChartPageState extends State<GanttChartPage> {
     );
   }
 }
-

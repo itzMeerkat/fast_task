@@ -34,9 +34,9 @@ class _TaskManagementPageState extends State<TaskManagementPage> {
     });
     final settingsProvider = context.read<SettingsProvider>();
     context.read<TaskProvider>().searchTasks(
-          query,
-          sortBy: settingsProvider.currentSort,
-        );
+      query,
+      sortBy: settingsProvider.currentSort,
+    );
   }
 
   /// Show edit modal for a task
@@ -61,9 +61,7 @@ class _TaskManagementPageState extends State<TaskManagementPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
@@ -79,7 +77,7 @@ class _TaskManagementPageState extends State<TaskManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Management'),
+        // title: const Text('Tasks'),
         centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -158,4 +156,3 @@ class _TaskManagementPageState extends State<TaskManagementPage> {
     );
   }
 }
-

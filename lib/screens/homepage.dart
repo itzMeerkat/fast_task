@@ -1,5 +1,6 @@
 // Homepage screen showing pending tasks
 
+import 'package:fast_task/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -82,9 +83,27 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Tracker'),
+        title: const Text('Record your honest work!'),
         centerTitle: false,
         actions: [
+          if (isDesktop())
+            Consumer<SettingsProvider>(
+              builder: (context, settingsProvider, child) {
+                return IconButton(
+                  icon: Icon(
+                    settingsProvider.alwaysOnTop
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined,
+                  ),
+                  tooltip: 'Always on top',
+                  onPressed: () {
+                    settingsProvider.setAlwaysOnTop(
+                      !settingsProvider.alwaysOnTop,
+                    );
+                  },
+                );
+              },
+            ),
           Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) {
               return PopupMenuButton<SortBy>(
@@ -93,7 +112,9 @@ class _HomepageState extends State<Homepage> {
                 onSelected: (sortBy) async {
                   await settingsProvider.setSortBy(sortBy);
                   if (mounted) {
-                    await context.read<TaskProvider>().loadTasks(sortBy: sortBy);
+                    await context.read<TaskProvider>().loadTasks(
+                      sortBy: sortBy,
+                    );
                   }
                 },
                 itemBuilder: (context) => SortBy.values.map((sortBy) {
@@ -183,95 +204,99 @@ class _HomepageState extends State<Homepage> {
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
               child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Add New Task',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _briefController,
-                    decoration: const InputDecoration(
-                      labelText: 'Task Description',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    maxLines: 2,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _saveTask(),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _selectDeadline,
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: Text(
-                            _selectedDeadline == null
-                                ? 'Set Deadline'
-                                : DateFormat('MMM dd, yyyy').format(_selectedDeadline!),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Add New Task',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      if (_selectedDeadline != null)
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedDeadline = null;
-                            });
-                          },
-                          icon: const Icon(Icons.clear, size: 20),
-                          tooltip: 'Clear deadline',
-                        ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<Priority>(
-                          initialValue: _selectedPriority,
-                          decoration: const InputDecoration(
-                            labelText: 'Priority',
-                            border: OutlineInputBorder(),
-                            isDense: true,
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _briefController,
+                      decoration: const InputDecoration(
+                        labelText: 'Task Description',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      maxLines: 2,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _saveTask(),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _selectDeadline,
+                            icon: const Icon(Icons.calendar_today, size: 18),
+                            label: Text(
+                              _selectedDeadline == null
+                                  ? 'Set Deadline'
+                                  : DateFormat(
+                                      'MMM dd, yyyy',
+                                    ).format(_selectedDeadline!),
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ),
-                          items: Priority.values.map((priority) {
-                            return DropdownMenuItem(
-                              value: priority,
-                              child: Text(priority.displayName),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
+                        ),
+                        if (_selectedDeadline != null)
+                          IconButton(
+                            onPressed: () {
                               setState(() {
-                                _selectedPriority = value;
+                                _selectedDeadline = null;
                               });
-                            }
-                          },
+                            },
+                            icon: const Icon(Icons.clear, size: 20),
+                            tooltip: 'Clear deadline',
+                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonFormField<Priority>(
+                            initialValue: _selectedPriority,
+                            decoration: const InputDecoration(
+                              labelText: 'Priority',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            items: Priority.values.map((priority) {
+                              return DropdownMenuItem(
+                                value: priority,
+                                child: Text(priority.displayName),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedPriority = value;
+                                });
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _saveTask,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Task'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: _saveTask,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Task'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
             ),
           ),
         ],
@@ -279,4 +304,3 @@ class _HomepageState extends State<Homepage> {
     );
   }
 }
-

@@ -125,7 +125,16 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
   }
 
   Widget _buildTaskLabelList() {
-    final List<Widget> taskLabels = [SizedBox(height: widget.rowHeight-15)];
+    final List<Widget> taskLabels = [
+      Container(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.black, width: 0.4)),
+        ),
+        height: widget.rowHeight - 15,
+        width: widget.labelWidth,
+      ),
+    ];
+
     for (var task in widget.taskProgressData) {
       taskLabels.add(
         Container(
@@ -134,13 +143,8 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
           decoration: BoxDecoration(
             border: task != widget.taskProgressData.last
-                          ? Border(
-                              bottom: BorderSide(
-                                color: Colors.grey,
-                                width:0.4,
-                              ),
-                            )
-                          : null,
+                ? Border(bottom: BorderSide(color: Colors.grey, width: 0.4))
+                : null,
           ),
           child: Row(
             children: [
@@ -236,7 +240,7 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
                     ),
                   ),
                   child: SizedBox(
-                    height: widget.rowHeight-15,
+                    height: widget.rowHeight - 15,
                     width: dayWidth,
                     child: Column(
                       children: [
@@ -301,7 +305,7 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
                   border: Border(
                     right: BorderSide(color: Colors.grey, width: 0.5),
                   ),
-                  color: dateOnly.weekday >5 ? Colors.grey.shade200:null
+                  color: dateOnly.weekday > 5 ? Colors.grey.shade200 : null,
                 ),
                 child: Column(children: cols),
               );
@@ -322,8 +326,8 @@ class _HonestGanttChartState extends State<HonestGanttChart> {
     if (task.progressRecords.isEmpty) {
       return 0;
     }
-    if ((task.progressRecords.first.date.isBefore(date) &&
-            task.progressRecords.last.date.isAfter(date)) ||
+    if ((task.progressRecords.first.date.isAfter(date) &&
+            task.progressRecords.last.date.isBefore(date)) ||
         (task.task.status == TaskStatus.inProgress &&
             task.progressRecords.last.date.isBefore(date) &&
             DateTime.now().isAfter(date))) {

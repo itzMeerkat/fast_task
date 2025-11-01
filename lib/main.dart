@@ -1,7 +1,9 @@
 // Main entry point for the Task Tracker app
 
+import 'package:fast_task/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 import 'providers/settings_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/progress_provider.dart';
@@ -10,10 +12,16 @@ import 'screens/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  if (isDesktop()) {
+    await windowManager.ensureInitialized();
+    windowManager.waitUntilReadyToShow().then((_) async {
+      await windowManager.setTitle('Fast Task - Track your honest work');
+    });
+  }
+
   // Initialize notification service
   // await NotificationService.instance.initialize();
-  
+
   runApp(const MyApp());
 }
 
@@ -30,7 +38,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
       child: MaterialApp(
-        title: 'Task Tracker',
+        title: 'Fast Task - Track your honest work',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
@@ -83,11 +91,7 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return const MainScreen();
